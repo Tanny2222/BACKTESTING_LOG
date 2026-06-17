@@ -1577,6 +1577,7 @@ function sortBy(key) {
   }
   updateSortArrows();
   renderCards();
+  updateStats();
 }
 
 function updateSortArrows() {
@@ -1807,6 +1808,27 @@ function getFilteredTrades() {
     .filter(t => !tagFilter || (Array.isArray(t.tags) && t.tags.includes(tagFilter)));
 }
 
+// comparator ตาม sortKey/sortDir ปัจจุบัน (ใช้ร่วมกันทั้งตารางและสถิติ con win/loss)
+function compareBySortKey(a, b) {
+  let va, vb;
+  if (sortKey === 'tradeNo') {
+    va = parseInt(a.tradeNo); vb = parseInt(b.tradeNo);
+    if (isNaN(va)) va = a.tradeNo; if (isNaN(vb)) vb = b.tradeNo;
+  } else if (sortKey === 'rr' || sortKey === 'duration') {
+    va = (a[sortKey] === '' || a[sortKey] === undefined || a[sortKey] === null) ? -Infinity : parseFloat(a[sortKey]);
+    vb = (b[sortKey] === '' || b[sortKey] === undefined || b[sortKey] === null) ? -Infinity : parseFloat(b[sortKey]);
+  } else if (sortKey === 'tradeDate') {
+    va = a.tradeDate || a.date || '';
+    vb = b.tradeDate || b.date || '';
+  } else {
+    va = (a[sortKey] || '').toString().toLowerCase();
+    vb = (b[sortKey] || '').toString().toLowerCase();
+  }
+  if (va < vb) return sortDir === 'asc' ? -1 : 1;
+  if (va > vb) return sortDir === 'asc' ? 1 : -1;
+  return 0;
+}
+
 function updateStats() {
   const filtered = getFilteredTrades();
   const total = filtered.length;
@@ -1817,11 +1839,9 @@ function updateStats() {
   const decided = wins + losses;
   document.getElementById('statWinrate').textContent = decided > 0 ? Math.round((wins / decided) * 100) + '%' : '—';
 
-  const ordered = filtered.slice().sort((a, b) => {
-    const na = parseInt(a.tradeNo), nb = parseInt(b.tradeNo);
-    if (!isNaN(na) && !isNaN(nb)) return na - nb;
-    return String(a.tradeNo).localeCompare(String(b.tradeNo));
-  });
+  // ใช้ลำดับตาม sort ปัจจุบันของตาราง (sortKey/sortDir) เพื่อให้ con win/loss
+  // นับ streak ตามลำดับที่ผู้ใช้กำลังดูอยู่จริง
+  const ordered = filtered.slice().sort(compareBySortKey);
 
   let conWin = 0, conLoss = 0, curWin = 0, curLoss = 0;
   for (let i = 0; i < ordered.length; i++) {
@@ -1863,25 +1883,7 @@ function renderCards() {
   const grid = document.getElementById('cardGrid');
   const filtered = getFilteredTrades()
     .slice()
-    .sort((a, b) => {
-      let va, vb;
-      if (sortKey === 'tradeNo') {
-        va = parseInt(a.tradeNo); vb = parseInt(b.tradeNo);
-        if (isNaN(va)) va = a.tradeNo; if (isNaN(vb)) vb = b.tradeNo;
-      } else if (sortKey === 'rr' || sortKey === 'duration') {
-        va = (a[sortKey] === '' || a[sortKey] === undefined || a[sortKey] === null) ? -Infinity : parseFloat(a[sortKey]);
-        vb = (b[sortKey] === '' || b[sortKey] === undefined || b[sortKey] === null) ? -Infinity : parseFloat(b[sortKey]);
-      } else if (sortKey === 'tradeDate') {
-        va = a.tradeDate || a.date || '';
-        vb = b.tradeDate || b.date || '';
-      } else {
-        va = (a[sortKey] || '').toString().toLowerCase();
-        vb = (b[sortKey] || '').toString().toLowerCase();
-      }
-      if (va < vb) return sortDir === 'asc' ? -1 : 1;
-      if (va > vb) return sortDir === 'asc' ? 1 : -1;
-      return 0;
-    })
+    .sort(compareBySortKey)
     .sort((a, b) => (a.pcImage === false ? 0 : 1) - (b.pcImage === false ? 0 : 1));
 
   const anyFilter = !!(document.getElementById('searchInput')?.value || statusFilter || tagFilter);
