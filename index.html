@@ -1307,6 +1307,7 @@
       <th class="sortable-th" onclick="sortBy('tradeNo')">Trade No. <span class="sort-arrow" id="sortArrow-tradeNo"></span></th>
       <th class="sortable-th" onclick="sortBy('status')">Status <span class="sort-arrow" id="sortArrow-status"></span></th>
       <th class="sortable-th" onclick="sortBy('tradeDate')">Date <span class="sort-arrow" id="sortArrow-tradeDate"></span></th>
+      <th class="sortable-th" onclick="sortBy('entryTime')">Entry Time <span class="sort-arrow" id="sortArrow-entryTime"></span></th>
       <th class="sortable-th" onclick="sortBy('session')">Session <span class="sort-arrow" id="sortArrow-session"></span></th>
       <th>Tags</th>
       <th>Before</th>
@@ -1377,6 +1378,11 @@
       <div class="field">
         <label>Date</label>
         <input type="date" id="inputDate" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color 0.15s;color-scheme:dark" />
+      </div>
+
+      <div class="field">
+        <label>Entry Time</label>
+        <input type="time" id="inputEntryTime" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color 0.15s;color-scheme:dark" />
       </div>
 
       <div class="field">
@@ -1724,6 +1730,7 @@ async function saveTrade() {
   const statusEl = document.querySelector('input[name="tradeStatus"]:checked');
   const status = statusEl ? statusEl.value : '';
   const tradeDate = document.getElementById('inputDate').value;
+  const entryTime = document.getElementById('inputEntryTime').value;
   const session = activeSession || '';
   const now = new Date().toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'numeric' });
   const tags = curTags.slice();
@@ -1740,12 +1747,12 @@ async function saveTrade() {
   try {
     if (editId) {
       const existing = trades.find(t => t.id === editId);
-      const updated = { ...existing, tradeNo: no, before, after, rr, tags, status, tradeDate, session, note, duration };
+      const updated = { ...existing, tradeNo: no, before, after, rr, tags, status, tradeDate, entryTime, session, note, duration };
       await apiPost({ action: 'update', trade: updated });
       trades = trades.map(t => t.id === editId ? updated : t);
     } else {
       const id = Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-      const newTrade = { id, tradeNo: no, before, after, rr, tags, status, tradeDate, session, note, duration, date: now, pcImage: true };
+      const newTrade = { id, tradeNo: no, before, after, rr, tags, status, tradeDate, entryTime, session, note, duration, date: now, pcImage: true };
       await apiPost({ action: 'add', trade: newTrade });
       trades.push(newTrade);
     }
@@ -1889,7 +1896,7 @@ function renderCards() {
   const anyFilter = !!(document.getElementById('searchInput')?.value || statusFilter || tagFilter);
 
   if (!filtered.length) {
-    grid.innerHTML = `<tr><td colspan="12">
+    grid.innerHTML = `<tr><td colspan="13">
       <div class="empty-state">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
         <h3>${anyFilter ? 'ไม่พบผลลัพธ์' : 'ยังไม่มี Trade'}</h3>
@@ -1919,6 +1926,7 @@ function renderCards() {
       </td>
       <td>${t.status ? `<span class="status-badge status-${t.status}">${t.status}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
       <td style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">${fmtDate(t.tradeDate) !== '—' ? fmtDate(t.tradeDate) : (t.date || '—')}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">${t.entryTime || '—'}</td>
       <td>${t.session ? `<span class="session-badge sess-${t.session}">${{asia:'Asia',london:'London',ny:'New York',oos:'Out of Session'}[t.session]||t.session}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
       <td>
         ${Array.isArray(t.tags) && t.tags.length
@@ -1953,6 +1961,7 @@ function openAddModal() {
   document.getElementById('modalTitle').textContent = 'เพิ่ม Trade ใหม่';
   document.getElementById('inputTradeNo').value = nextTradeNo();
   document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('inputEntryTime').value = '';
   document.getElementById('inputRR').value = '';
   updateRRPrefix();
   if (document.getElementById('inputDurationDays')) document.getElementById('inputDurationDays').value = '';
@@ -2119,6 +2128,7 @@ function editTrade(id) {
   document.getElementById('modalTitle').textContent = `แก้ไข Trade #${t.tradeNo}`;
   document.getElementById('inputTradeNo').value = t.tradeNo;
   document.getElementById('inputDate').value = (t.tradeDate || '').slice(0, 10);
+  document.getElementById('inputEntryTime').value = t.entryTime || '';
   document.getElementById('inputRR').value = (t.rr !== undefined && t.rr !== '') ? t.rr : '';
   updateRRPrefix();
   curTags = Array.isArray(t.tags) ? [...t.tags] : [];
