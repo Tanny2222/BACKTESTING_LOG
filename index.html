@@ -213,6 +213,10 @@
     gap: 4px;
     padding: 0 2rem;
     border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: var(--header-h, 73px);
+    background: var(--bg);
+    z-index: 90;
   }
   .page-tab {
     padding: 12px 18px;
@@ -370,6 +374,10 @@
     gap: 12px;
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
+    position: sticky;
+    top: var(--tabs-h, 117px);
+    background: var(--bg);
+    z-index: 80;
   }
 
   .btn {
@@ -3072,6 +3080,21 @@ function renderStats() {
 
   `;
 }
+
+// ── Sticky offset measurement ──
+function updateStickyOffsets() {
+  const header = document.querySelector('header');
+  const tabs   = document.querySelector('.page-tabs');
+  if (!header || !tabs) return;
+  const hH = header.getBoundingClientRect().height;
+  const tH = tabs.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--header-h', hH + 'px');
+  document.documentElement.style.setProperty('--tabs-h',   hH + tH + 'px');
+}
+window.addEventListener('resize', updateStickyOffsets);
+window.addEventListener('load',   updateStickyOffsets);
+// also run after fonts/content load
+setTimeout(updateStickyOffsets, 200);
 
 // ── Init ──
 applyBanner();
