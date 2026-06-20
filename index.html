@@ -76,10 +76,9 @@
   /* ─── Header ─── */
   header {
     border-bottom: 1px solid var(--border);
-    padding: 1.25rem 2rem;
-    padding-right: 3.5rem;
-    display: grid;
-    grid-template-columns: auto 1fr;
+    padding: 0.9rem 2rem;
+    padding-right: 3.75rem;
+    display: flex;
     align-items: center;
     gap: 1.5rem;
     position: sticky;
@@ -90,46 +89,87 @@
 
   /* ── Goal block (centre of header) ── */
   .header-goal {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid rgba(59,191,126,0.4);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    box-shadow: 0 0 18px rgba(59,191,126,0.08);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .header-goal:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 24px rgba(59,191,126,0.18);
+  }
+
+  .goal-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #1e7a4e, var(--green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .goal-icon svg { width: 15px; height: 15px; stroke: #0D0F14; fill: none; stroke-width: 2.5; }
+
+  .goal-text-block {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    gap: 5px;
   }
-  .goal-progress-wrap {
+  .goal-top-row {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .goal-label-small {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
   }
   .goal-counts {
     display: flex;
     align-items: baseline;
-    gap: 4px;
-    cursor: pointer;
+    gap: 3px;
   }
-  .goal-counts:hover .goal-target { color: var(--gold); }
   .goal-done {
     font-family: var(--font-mono);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green);
     line-height: 1;
   }
-  .goal-sep { font-size: 16px; color: var(--muted); }
+  .goal-sep { font-size: 13px; color: var(--muted); }
   .goal-target {
     font-family: var(--font-mono);
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--muted);
     line-height: 1;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     transition: color 0.15s;
   }
-  .goal-target svg { width: 9px; height: 9px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+  .goal-target svg { width: 8px; height: 8px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+  .header-goal:hover .goal-target { color: var(--green); }
+
+  .goal-bottom-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .goal-bar-track {
-    width: 140px;
-    height: 5px;
+    width: 110px;
+    height: 4px;
     background: var(--border);
     border-radius: 99px;
     overflow: hidden;
@@ -137,7 +177,7 @@
   .goal-bar-fill {
     height: 100%;
     border-radius: 99px;
-    background: linear-gradient(90deg, var(--gold-dim, #8B6914), var(--gold));
+    background: linear-gradient(90deg, #1e7a4e, var(--green));
     transition: width 0.4s ease;
   }
   .goal-label {
@@ -147,16 +187,12 @@
     text-transform: uppercase;
   }
   .goal-remain-badge {
-    font-size: 11px;
+    font-size: 10px;
     font-family: var(--font-mono);
     color: var(--muted);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 99px;
-    padding: 1px 8px;
     white-space: nowrap;
   }
-  .goal-remain-badge.done { color: var(--green); border-color: var(--green); }
+  .goal-remain-badge.done { color: var(--green); }
 
   .logo {
     display: flex;
@@ -427,17 +463,39 @@
 
   /* ─── Trade Table ─── */
   .table-wrap {
-    padding: 1.5rem 2rem;
+    padding: 1rem 2rem 1.25rem;
     overflow-x: auto;
+  }
+
+  .table-scroll-container {
+    max-height: calc(100vh - var(--tabs-h, 117px) - 110px);
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .table-scroll-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .table-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .table-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 99px;
+  }
+  .table-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
   }
 
   .trade-table {
     width: 100%;
     border-collapse: collapse;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
     font-size: 13px;
   }
 
@@ -452,6 +510,9 @@
     text-transform: uppercase;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
   .trade-table th.sortable-th {
     cursor: pointer;
@@ -1335,24 +1396,31 @@
     </div>
   </div>
 
-  <!-- ── Goal Block (centre) ── -->
-  <div class="header-goal">
-    <div class="goal-label">GOAL</div>
-    <div class="goal-progress-wrap">
-      <div class="goal-counts" onclick="openTargetModal()" title="แก้ไข Target">
-        <span class="goal-done" id="goalDone">0</span>
-        <span class="goal-sep">/</span>
-        <span class="goal-target">
-          <span id="goalTarget">—</span>
-          <svg viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13l-3 1 1-3Z"/></svg>
-        </span>
-      </div>
-      <div class="goal-bar-track">
-        <div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div>
-      </div>
-      <span class="goal-remain-badge" id="goalRemainBadge">— left</span>
+  <!-- ── Goal Block (right) ── -->
+  <div class="header-goal" onclick="openTargetModal()" title="แก้ไข Target">
+    <div class="goal-icon">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3"/><line x1="8" y1="2" x2="8" y2="1"/></svg>
     </div>
-    <div class="goal-label" id="goalSubLabel" style="letter-spacing:0.05em;text-transform:none;font-size:11px;color:var(--muted)">trades to target</div>
+    <div class="goal-text-block">
+      <div class="goal-top-row">
+        <span class="goal-label-small">GOAL</span>
+        <div class="goal-counts">
+          <span class="goal-done" id="goalDone">0</span>
+          <span class="goal-sep">/</span>
+          <span class="goal-target">
+            <span id="goalTarget">—</span>
+            <svg viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13l-3 1 1-3Z"/></svg>
+          </span>
+        </div>
+        <span class="goal-remain-badge" id="goalRemainBadge">— left</span>
+      </div>
+      <div class="goal-bottom-row">
+        <div class="goal-bar-track">
+          <div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div>
+        </div>
+        <span id="goalSubLabel" style="font-size:10px;color:var(--muted)">trades to go</span>
+      </div>
+    </div>
   </div>
 
 </header>
@@ -1424,6 +1492,7 @@
 </div>
 
 <div class="table-wrap">
+<div class="table-scroll-container">
 <table class="trade-table">
   <thead>
     <tr>
@@ -1444,6 +1513,7 @@
   </thead>
   <tbody id="cardGrid"></tbody>
 </table>
+</div>
 </div>
 </div>
 
