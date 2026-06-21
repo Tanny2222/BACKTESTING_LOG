@@ -2550,7 +2550,15 @@ function editTrade(id) {
   document.getElementById('modalTitle').textContent = `แก้ไข Trade #${t.tradeNo}`;
   document.getElementById('inputTradeNo').value = t.tradeNo;
   document.getElementById('inputDate').value = (t.tradeDate || '').slice(0, 10);
-  document.getElementById('inputEntryTime').value = t.entryTime || '';
+  const etVal = t.entryTime || '';
+  const etSelect = document.getElementById('inputEntryTime');
+  etSelect.value = etVal;
+  // fallback: ถ้า set ตรงๆ ไม่ match (ข้อมูลเก่าเก็บแค่ "07:00") ให้หา option ที่ขึ้นต้นด้วย HH:mm เดียวกัน
+  if (!etSelect.value && etVal) {
+    const prefix = etVal.slice(0, 5);
+    const opt = [...etSelect.options].find(o => o.value.startsWith(prefix));
+    if (opt) etSelect.value = opt.value;
+  }
   document.getElementById('inputRR').value = (t.rr !== undefined && t.rr !== '') ? t.rr : '';
   updateRRPrefix();
   curTags = Array.isArray(t.tags) ? [...t.tags] : [];
