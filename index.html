@@ -3210,14 +3210,14 @@ function renderStats() {
         <div class="kpi-sub">Max RR</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-val" style="color:var(--green)">${rrWin.length?fmt(avgWin):'—'}</div>
-        <div class="kpi-label">Avg Win RR</div>
+        <div class="kpi-val" style="color:var(--green)">${rrWin.length?fmt(minWinRR):'—'}</div>
+        <div class="kpi-label">Min RR (WIN)</div>
         <div class="kpi-sub">from ${rrWin.length} wins</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-val" style="color:var(--red)">${rrLoss.length?fmt(avgLoss):'—'}</div>
-        <div class="kpi-label">Avg Loss RR</div>
-        <div class="kpi-sub">from ${rrLoss.length} losses</div>
+        <div class="kpi-val" style="color:var(--green)">${rrWin.length?fmt(avgWin):'—'}</div>
+        <div class="kpi-label">Avg Win RR</div>
+        <div class="kpi-sub">from ${rrWin.length} wins</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-val" style="color:var(--green)">${conW}</div>
