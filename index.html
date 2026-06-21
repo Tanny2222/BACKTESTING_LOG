@@ -1371,6 +1371,134 @@
     0%,100% { opacity: 1; }
     50% { opacity: 0.3; }
   }
+
+  /* ─── Script Source Manager ─── */
+  .source-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    font-size: 12px;
+    color: var(--text);
+    max-width: 200px;
+  }
+  .source-chip:hover { border-color: var(--green); }
+  .source-chip-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .source-chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .source-chip-icon {
+    width: 12px; height: 12px;
+    stroke: var(--muted);
+    fill: none;
+    stroke-width: 2;
+    flex-shrink: 0;
+  }
+
+  /* script modal source list */
+  .script-source-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .script-source-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.12s;
+    cursor: pointer;
+  }
+  .script-source-item:hover { border-color: var(--green); }
+  .script-source-item.active-source {
+    border-color: var(--green);
+    background: rgba(59,191,126,0.06);
+  }
+  .script-source-radio {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .script-source-item.active-source .script-source-radio {
+    border-color: var(--green);
+    background: var(--green);
+  }
+  .script-source-info { flex: 1; min-width: 0; }
+  .script-source-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .script-source-url {
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+  .script-source-del {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.12s, background 0.12s;
+  }
+  .script-source-del:hover { color: var(--red); background: rgba(255,80,80,0.08); }
+  .script-source-del svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  .add-script-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .add-script-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color 0.12s;
+  }
+  .add-script-form input:focus { border-color: var(--green); }
+  .add-script-form input::placeholder { color: var(--muted); }
+
 </style>
 </head>
 <body>
@@ -1395,6 +1523,13 @@
       <div class="logo-sub" id="bannerSub">Trade Image Journal</div>
     </div>
   </div>
+
+  <!-- ── Script Source Chip ── -->
+  <button class="source-chip" onclick="openScriptModal()" title="เปลี่ยน Script Source" id="sourceChip">
+    <span class="source-chip-dot"></span>
+    <span class="source-chip-name" id="sourceChipName">Default</span>
+    <svg class="source-chip-icon" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+  </button>
 
   <!-- ── Goal Block (right) ── -->
   <div class="header-goal" onclick="openTargetModal()" title="แก้ไข Target">
@@ -1758,7 +1893,25 @@
 //  BACKTEST JOURNAL — Online Version (Google Sheets backend)
 //  แก้ APPS_SCRIPT_URL ให้ตรงกับ URL ที่ได้จาก Google Apps Script
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYu9F5MxVeEGLjzD1WfBVyl2y3xqZ6lp7HjGZfzDV_x4yIy3o8YfVOoFqdzxfv2tL0/exec';
+// ── Script Sources ──
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYu9F5MxVeEGLjzD1WfBVyl2y3xqZ6lp7HjGZfzDV_x4yIy3o8YfVOoFqdzxfv2tL0/exec';
+
+function getScriptSources() {
+  try { return JSON.parse(localStorage.getItem('scriptSources') || '[]'); } catch { return []; }
+}
+function saveScriptSources(arr) {
+  localStorage.setItem('scriptSources', JSON.stringify(arr));
+}
+function getActiveScriptUrl() {
+  const sources = getScriptSources();
+  const active = sources.find(s => s.active);
+  return (active && active.url) ? active.url : DEFAULT_SCRIPT_URL;
+}
+function getActiveScriptName() {
+  const sources = getScriptSources();
+  const active = sources.find(s => s.active);
+  return active ? active.name : 'Default';
+}
 
 const SVG = {
   img: `<svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>`,
@@ -1811,7 +1964,7 @@ function hideSync() {
 
 // ── API helpers ──
 async function apiGet() {
-  const res = await fetch(APPS_SCRIPT_URL, { method: 'GET' });
+  const res = await fetch(getActiveScriptUrl(), { method: 'GET' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
@@ -1819,7 +1972,7 @@ async function apiGet() {
 }
 
 async function apiPost(body) {
-  const res = await fetch(APPS_SCRIPT_URL, {
+  const res = await fetch(getActiveScriptUrl(), {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -3171,8 +3324,123 @@ applyBanner();
 setStatusFilter(null);
 updateSortArrows();
 populateEntryTimeOptions();
+updateSourceChip();
 loadTrades();
 
+
+// ══════════════════════════════════════════
+//  Script Source Manager
+// ══════════════════════════════════════════
+
+function openScriptModal() {
+  renderScriptSourceList();
+  document.getElementById('scriptModal').classList.add('open');
+}
+function closeScriptModal() {
+  document.getElementById('scriptModal').classList.remove('open');
+  document.getElementById('newScriptName').value = '';
+  document.getElementById('newScriptUrl').value = '';
+}
+
+function renderScriptSourceList() {
+  const sources = getScriptSources();
+  const list = document.getElementById('scriptSourceList');
+
+  if (sources.length === 0) {
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0">ยังไม่มี Source — เพิ่มด้านล่างได้เลย</div>`;
+    return;
+  }
+
+  list.innerHTML = sources.map((s, i) => `
+    <div class="script-source-item ${s.active ? 'active-source' : ''}" onclick="setActiveSource(${i})">
+      <div class="script-source-radio"></div>
+      <div class="script-source-info">
+        <div class="script-source-name">${escHtml(s.name)}</div>
+        <div class="script-source-url">${escHtml(s.url)}</div>
+      </div>
+      <button class="script-source-del" onclick="deleteScriptSource(event,${i})" title="ลบ">
+        <svg viewBox="0 0 16 16"><polyline points="3,5 13,5"/><path d="M6 5V3h4v2M5 5l.8 9h4.4L11 5"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+function setActiveSource(idx) {
+  const sources = getScriptSources();
+  sources.forEach((s, i) => s.active = (i === idx));
+  saveScriptSources(sources);
+  renderScriptSourceList();
+  updateSourceChip();
+  // reload data from new source
+  loadTrades();
+}
+
+function deleteScriptSource(event, idx) {
+  event.stopPropagation();
+  const sources = getScriptSources();
+  const wasActive = sources[idx].active;
+  sources.splice(idx, 1);
+  // if deleted was active, set first as active
+  if (wasActive && sources.length > 0) sources[0].active = true;
+  saveScriptSources(sources);
+  renderScriptSourceList();
+  updateSourceChip();
+  if (wasActive) loadTrades();
+}
+
+function addScriptSource() {
+  const name = document.getElementById('newScriptName').value.trim();
+  const url  = document.getElementById('newScriptUrl').value.trim();
+  if (!name) { alert('กรุณาใส่ชื่อ / รายละเอียด'); return; }
+  if (!url.startsWith('https://script.google.com/')) { alert('URL ต้องเป็น Google Apps Script URL'); return; }
+
+  const sources = getScriptSources();
+  const isFirst = sources.length === 0;
+  sources.push({ name, url, active: isFirst });
+  saveScriptSources(sources);
+
+  document.getElementById('newScriptName').value = '';
+  document.getElementById('newScriptUrl').value = '';
+  renderScriptSourceList();
+  updateSourceChip();
+  if (isFirst) loadTrades();
+}
+
+function updateSourceChip() {
+  const chip = document.getElementById('sourceChipName');
+  if (chip) chip.textContent = getActiveScriptName();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 </script>
+
+<!-- Script Source Manager Modal -->
+<div class="modal-overlay" id="scriptModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title">จัดการ Script Source</span>
+      <button class="icon-btn" onclick="closeScriptModal()">
+        <svg viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="scriptSourceList" class="script-source-list"></div>
+
+      <div class="add-script-form">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px">เพิ่ม Source ใหม่</div>
+        <input type="text" id="newScriptName" placeholder="ชื่อไฟล์ / รายละเอียด เช่น Strategy A — Jan 2025" />
+        <input type="text" id="newScriptUrl" placeholder="Apps Script URL (https://script.google.com/…)" />
+        <button class="btn btn-primary" onclick="addScriptSource()" style="align-self:flex-start">
+          <svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+          เพิ่ม
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
