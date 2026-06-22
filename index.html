@@ -1576,6 +1576,7 @@
   <button class="page-tab active" id="tabStats" onclick="switchPage('stats')">Statistics</button>
   <button class="page-tab" id="tabTrades" onclick="switchPage('trades')">Trades</button>
   <button class="page-tab" id="tabGallery" onclick="switchPage('gallery')">Gallery</button>
+  <button class="page-tab" id="tabRisk" onclick="switchPage('risk')">Risk Management</button>
 </div>
 
 <div id="pageTrades" class="page-view">
@@ -1676,6 +1677,71 @@
 <div id="pageStats" class="page-view active">
   <div class="stats-page" id="statsPageContent">
     <!-- filled by renderStats() -->
+  </div>
+</div>
+
+<!-- ═══ Risk Management Page ═══ -->
+<div id="pageRisk" class="page-view">
+  <div style="padding:1.5rem 2rem;max-width:1100px;margin:0 auto">
+
+    <!-- Title -->
+    <div style="margin-bottom:1.5rem">
+      <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px">Risk Management</div>
+      <div style="font-size:13px;color:var(--muted)">คำนวณ Risk ที่เหมาะสมสำหรับการเทรดกองทุน — กรอก Parameter แล้วกด Calculate</div>
+    </div>
+
+    <!-- Input Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:1.5rem">
+
+      <div class="kpi-card" style="padding:16px 18px;gap:8px;display:flex;flex-direction:column;border-color:var(--gold)">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold)">Initial Balance</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:var(--muted);font-size:15px;font-family:var(--font-mono)">$</span>
+          <input type="number" id="riskBalance" value="10000" min="0" step="100"
+            style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:16px;font-weight:600;outline:none;transition:border-color 0.15s"
+            oninput="calcRisk()" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'" />
+        </div>
+        <div style="font-size:11px;color:var(--muted)">เงินทุนตั้งต้นของ Port (Dollar)</div>
+      </div>
+
+      <div class="kpi-card" style="padding:16px 18px;gap:8px;display:flex;flex-direction:column">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red)">Daily DD Limit</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="riskDailyDD" value="5" min="0.1" max="100" step="0.1"
+            style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:16px;font-weight:600;outline:none;transition:border-color 0.15s"
+            oninput="calcRisk()" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'" />
+          <span style="color:var(--muted);font-size:13px;white-space:nowrap">% / วัน</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">Max % loss ต่อวัน ห้ามเกิน</div>
+      </div>
+
+      <div class="kpi-card" style="padding:16px 18px;gap:8px;display:flex;flex-direction:column">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red)">Max DD ทั้ง Port</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="riskMaxDD" value="20" min="0.1" max="100" step="0.1"
+            style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:16px;font-weight:600;outline:none;transition:border-color 0.15s"
+            oninput="calcRisk()" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'" />
+          <span style="color:var(--muted);font-size:13px;white-space:nowrap">% ทั้ง Port</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">Max % ของทั้ง Port ถ้าเกิน สอบตก</div>
+      </div>
+
+      <div class="kpi-card" style="padding:16px 18px;gap:8px;display:flex;flex-direction:column">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold)">จำนวนไม้ / วัน</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="riskMaxTrades" value="3" min="1" max="50" step="1"
+            style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:16px;font-weight:600;outline:none;transition:border-color 0.15s"
+            oninput="calcRisk()" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'" />
+          <span style="color:var(--muted);font-size:13px;white-space:nowrap">ไม้</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">หยุดเทรดเมื่อครบจำนวนไม้นี้</div>
+      </div>
+
+    </div>
+
+    <!-- Results Section -->
+    <div id="riskResults"></div>
+
   </div>
 </div>
 
@@ -2759,13 +2825,19 @@ function toggleTheme() {
   if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
 })();
 
+(function applyRiskBalance() {
+  const saved = localStorage.getItem('btj_riskBalance');
+  const inp = document.getElementById('riskBalance');
+  if (saved !== null && inp) inp.value = saved;
+})();
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeLightbox(); closeBannerModal(); closeTargetModal(); }
 });
 
 // ── Page navigation ──
 function switchPage(page) {
-  ['trades','gallery','stats'].forEach(p => {
+  ['trades','gallery','stats','risk'].forEach(p => {
     document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1))
       .classList.toggle('active', p === page);
     const tab = document.getElementById('tab' + p.charAt(0).toUpperCase() + p.slice(1));
@@ -2773,6 +2845,7 @@ function switchPage(page) {
   });
   if (page === 'gallery') renderGallery();
   if (page === 'stats') renderStats();
+  if (page === 'risk') calcRisk();
 }
 
 function goToTrade(id) {
@@ -3423,6 +3496,204 @@ function updateSourceChip() {
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════
+//  Risk Management Calculator
+// ══════════════════════════════════════════
+function calcRisk() {
+  const balanceInput = document.getElementById('riskBalance');
+  if (balanceInput && balanceInput.value === '') {
+    const saved = localStorage.getItem('btj_riskBalance');
+    if (saved !== null) balanceInput.value = saved;
+  }
+  const balance    = parseFloat(balanceInput?.value) || 0;
+  if (balanceInput) localStorage.setItem('btj_riskBalance', balanceInput.value);
+
+  const dailyDD    = parseFloat(document.getElementById('riskDailyDD')?.value) || 5;
+  const maxDD      = parseFloat(document.getElementById('riskMaxDD')?.value)  || 20;
+  const maxTrades  = parseInt(document.getElementById('riskMaxTrades')?.value) || 3;
+  const months     = parseInt(document.getElementById('riskMonths')?.value)    || 6;
+  const tradingDays= parseInt(document.getElementById('riskTradingDays')?.value)|| 20;
+
+  const el = document.getElementById('riskResults');
+  if (!el) return;
+
+  // ── Pull stats from current trades ──
+  const t = trades;
+  const wins   = t.filter(x => x.status === 'WIN');
+  const losses = t.filter(x => x.status === 'LOSS');
+  const decided = wins.length + losses.length;
+  const winrate = decided > 0 ? wins.length / decided : 0.5;
+  const rrWin  = wins.map(x => parseFloat(x.rr)).filter(v => !isNaN(v));
+  const rrLoss = losses.map(x => parseFloat(x.rr)).filter(v => !isNaN(v));
+  const avgWin  = rrWin.length  ? rrWin.reduce((a,b)=>a+b,0)/rrWin.length   : 1.5;
+  const avgLoss = rrLoss.length ? Math.abs(rrLoss.reduce((a,b)=>a+b,0)/rrLoss.length) : 1.0;
+  const hasData = decided >= 5;
+
+  // ── Core Risk Calculations ──
+  // Risk per trade derived from Daily DD and trades per day
+  const riskPerTrade_fromDaily = dailyDD / maxTrades;
+
+  // Max losses in a row before hitting Daily DD
+  const maxLossStreak_daily = Math.floor(dailyDD / riskPerTrade_fromDaily);
+
+  // Total trades over full period
+  const totalTradingDays = tradingDays * months;
+  const totalTrades = totalTradingDays * maxTrades;
+
+  // Max DD safety check: how many all-loss days before blowup?
+  const allLossDaysToBlowup = Math.floor(maxDD / dailyDD);
+
+  // Expected value per trade (in % of port, using riskPerTrade as 1R)
+  const ev_R = hasData ? (winrate * avgWin - (1 - winrate) * avgLoss) : null;
+  const ev_pct = ev_R !== null ? ev_R * riskPerTrade_fromDaily : null;
+
+  // Expected monthly return (trading days × trades/day × EV per trade)
+  const expectedMonthly = ev_pct !== null ? tradingDays * maxTrades * ev_pct : null;
+
+  // Probability of hitting Daily DD in a given day (binomial: all maxTrades lose)
+  // P(all loss in one day) = (1-WR)^maxTrades
+  const pAllLossDay = Math.pow(1 - winrate, maxTrades);
+
+  // Expected days to hit daily DD
+  const daysToDD = pAllLossDay > 0 ? Math.round(1 / pAllLossDay) : 99999;
+
+  // Probability of surviving all months without hitting maxDD
+  // Simplified: P(no blowup day in N days) = (1 - P_blowup_per_day)^N
+  // P_blowup_per_day ≈ pAllLossDay (each all-loss day costs dailyDD, allLossDaysToBlowup consecutive = blowup)
+  // Use geometric: P(survive) = (1 - P(string of allLossDaysToBlowup consecutive bad days))^(totalTradingDays)
+  const pBadStreak = Math.pow(1 - winrate, maxTrades * allLossDaysToBlowup);
+  const pSurvive = Math.pow(1 - pBadStreak, totalTradingDays) * 100;
+
+  // Recommended risk per trade (conservative: ensure maxDD can absorb at least 30 consecutive losses)
+  const safeRisk_conservative = maxDD / 30;
+  const safeRisk_moderate     = maxDD / 20;
+  const safeRisk_aggressive   = maxDD / 12;
+
+  // Effective risk per trade from daily constraint
+  const effectiveRisk = riskPerTrade_fromDaily;
+
+  // ── Dollar conversions (from Initial Balance) ──
+  const hasBalance = balance > 0;
+  const dailyDD_dollar           = balance * dailyDD / 100;
+  const maxDD_dollar             = balance * maxDD / 100;
+  const riskDollar_perTrade      = balance * effectiveRisk / 100;
+  const safeDollar_conservative  = balance * safeRisk_conservative / 100;
+  const safeDollar_moderate      = balance * safeRisk_moderate / 100;
+  const safeDollar_aggressive    = balance * safeRisk_aggressive / 100;
+
+  // Risk level assessment
+  let riskLevel, riskColor, riskMsg;
+  if (effectiveRisk <= safeRisk_conservative) {
+    riskLevel = 'CONSERVATIVE ✓'; riskColor = 'var(--green)';
+    riskMsg = 'Risk ต่อไม้ค่อนข้างปลอดภัย — Port มีโอกาสรอดสูง';
+  } else if (effectiveRisk <= safeRisk_moderate) {
+    riskLevel = 'MODERATE'; riskColor = 'var(--gold)';
+    riskMsg = 'Risk อยู่ในระดับกลาง — ต้องมีวินัยเรื่อง Daily DD อย่างเคร่งครัด';
+  } else if (effectiveRisk <= safeRisk_aggressive) {
+    riskLevel = 'AGGRESSIVE ⚠'; riskColor = '#F6AD55';
+    riskMsg = 'Risk สูง — โอกาส Hit Max DD ในเวลาสั้นถ้าเจอ losing streak';
+  } else {
+    riskLevel = 'DANGER ✕'; riskColor = 'var(--red)';
+    riskMsg = 'Risk สูงเกินไป — ควรลดจำนวนไม้ต่อวัน หรือขยาย Daily DD Limit';
+  }
+
+  const fmt2 = v => (typeof v === 'number' ? v.toFixed(2) : '—');
+  const fmtPct = v => (typeof v === 'number' ? v.toFixed(2) + '%' : '—');
+  const fmtMoney = v => (typeof v === 'number' ? '$' + v.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : '—');
+
+  el.innerHTML = `
+  ${!hasBalance ? `
+  <div style="border:1px dashed var(--gold-dim);border-radius:var(--radius);padding:10px 16px;margin-bottom:1.25rem;font-size:12px;color:var(--muted);background:var(--surface)">
+    💡 กรอก <span style="color:var(--gold)">Initial Balance</span> ด้านบน เพื่อแปลง Risk เป็นจำนวนเงิน ($) อัตโนมัติ
+  </div>` : ''}
+
+  <!-- Risk Tiers Table -->
+  <div style="margin-bottom:1.25rem">
+    <div class="stat-section-title">Risk Tiers — เปรียบเทียบ 3 ระดับ</div>
+    <div class="chart-card" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:10px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">ระดับ</th>
+            <th style="text-align:center;padding:10px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">Risk / ไม้</th>
+            ${hasBalance ? `<th style="text-align:center;padding:10px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">Risk / ไม้ ($)</th>` : ''}
+            <th style="text-align:center;padding:10px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">Loss Streak รับได้</th>
+            <th style="text-align:center;padding:10px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">Survival Days ก่อน Max DD</th>
+            <th style="text-align:center;padding:10px 14px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${[
+            { label: 'Conservative', risk: safeRisk_conservative, color: 'var(--green)' },
+            { label: 'Moderate',     risk: safeRisk_moderate,     color: 'var(--gold)' },
+            { label: 'Aggressive',   risk: safeRisk_aggressive,   color: '#F6AD55' },
+            { label: 'Your Setting', risk: effectiveRisk,          color: riskColor },
+          ].map(row => {
+            const streak = Math.floor(maxDD / row.risk);
+            const dailyRiskFromRow = row.risk * maxTrades;
+            const daysBeforeBlowup = dailyRiskFromRow > 0 ? Math.floor(maxDD / dailyRiskFromRow) : 0;
+            const isCurrent = row.label === 'Your Setting';
+            const rowDollar = balance * row.risk / 100;
+            return `<tr style="border-bottom:1px solid var(--border);background:${isCurrent ? 'rgba(255,255,255,0.03)' : 'transparent'}">
+              <td style="padding:10px 14px;font-weight:${isCurrent?700:400};color:${row.color}">${row.label}${isCurrent?' ◀':''}</td>
+              <td style="text-align:center;padding:10px 14px;font-family:var(--font-mono);color:${row.color}">${fmtPct(row.risk)}</td>
+              ${hasBalance ? `<td style="text-align:center;padding:10px 14px;font-family:var(--font-mono);color:${row.color}">${fmtMoney(rowDollar)}</td>` : ''}
+              <td style="text-align:center;padding:10px 14px;font-family:var(--font-mono);color:var(--text)">${streak} ไม้</td>
+              <td style="text-align:center;padding:10px 14px;font-family:var(--font-mono);color:var(--text)">${daysBeforeBlowup} วัน</td>
+              <td style="text-align:center;padding:10px 14px">
+                <span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px;background:${row.color}22;color:${row.color}">
+                  ${row.risk <= safeRisk_conservative ? '✓ SAFE' : row.risk <= safeRisk_moderate ? '~ OK' : row.risk <= safeRisk_aggressive ? '⚠ HIGH' : '✕ DANGER'}
+                </span>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- AI Recommendation -->
+  <div>
+    <div class="stat-section-title">คำแนะนำ Risk จาก Backtest</div>
+    <div class="chart-card" style="padding:18px 20px">
+      ${hasData ? `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">ข้อมูลจาก Backtest ของคุณ</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Winrate</span><span style="font-family:var(--font-mono);color:var(--text)">${(winrate*100).toFixed(1)}%</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Avg Win RR</span><span style="font-family:var(--font-mono);color:var(--green)">+${fmt2(avgWin)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Avg Loss RR</span><span style="font-family:var(--font-mono);color:var(--red)">-${fmt2(avgLoss)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">EV ต่อ Trade (R)</span><span style="font-family:var(--font-mono);color:${ev_R >= 0 ? 'var(--green)' : 'var(--red)'}">×${fmt2(ev_R)}</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">คำแนะนำ</div>
+          <div style="font-size:13px;line-height:1.75;color:var(--text)">
+            ${ev_R > 0 ? `
+            <div style="margin-bottom:8px">✅ System ของคุณมี <span style="color:var(--green);font-weight:600">Positive EV</span> — ควรรักษา Risk ให้คงที่และสม่ำเสมอ</div>
+            <div style="margin-bottom:8px">🎯 แนะนำ Risk ต่อไม้ที่ <span style="color:var(--gold);font-family:var(--font-mono);font-weight:600">${fmtPct(Math.min(effectiveRisk, safeRisk_moderate))}</span>${hasBalance ? ` (≈ <span style="color:var(--gold);font-family:var(--font-mono);font-weight:600">${fmtMoney(balance * Math.min(effectiveRisk, safeRisk_moderate) / 100)}</span>)` : ''} เพื่อ Balance ระหว่าง Growth และ Survival</div>
+            <div>📊 ด้วย Winrate ${(winrate*100).toFixed(0)}% และ ${maxTrades} ไม้/วัน — โอกาส hit Daily DD ต่อวัน ≈ <span style="font-family:var(--font-mono);color:var(--red)">${(pAllLossDay*100).toFixed(2)}%</span></div>
+            ` : `
+            <div style="margin-bottom:8px">⚠️ System ของคุณ <span style="color:var(--red);font-weight:600">ยังไม่มี Positive EV</span> — ยังไม่แนะนำให้ Live trade</div>
+            <div style="margin-bottom:8px">📝 ควร Backtest ต่อจนกว่า Winrate และ RR จะทำให้ EV เป็นบวก</div>
+            <div>🔒 ถ้า Live จำเป็น — ใช้ Risk ต่ำสุด <span style="font-family:var(--font-mono);color:var(--gold)">${fmtPct(safeRisk_conservative)}</span>${hasBalance ? ` (≈ <span style="font-family:var(--font-mono);color:var(--gold)">${fmtMoney(safeDollar_conservative)}</span>)` : ''} เท่านั้น</div>
+            `}
+          </div>
+        </div>
+      </div>
+      ` : `
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0">
+        <div style="font-size:28px;margin-bottom:8px">📊</div>
+        <div>ยังไม่มี Trade ข้อมูลเพียงพอ (ต้องการ ≥ 5 trade ที่มีผลลัพธ์)</div>
+        <div style="margin-top:4px;font-size:12px">การคำนวณ Risk Level ใช้ตัวเลขสมมุติ — ไปเพิ่ม Trade ใน Backtest ก่อนนะ</div>
+      </div>
+      `}
+    </div>
+  </div>
+  `;
 }
 
 
