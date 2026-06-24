@@ -3169,7 +3169,7 @@ function renderStats() {
 
   const c = v => v >= 0 ? 'var(--green)' : 'var(--red)';
   const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(2);
-  const pct = v => Math.round(v) + '%';
+  const pct = v => v.toFixed(1) + '%';
 
   // ── Equity curve data ──
   let equity = 0;
@@ -3457,7 +3457,7 @@ function renderStats() {
         <div class="kpi-sub">W RR / |L RR|</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-val" style="color:${ev>=0?'var(--green)':'var(--red)'}">${fmt(ev)}</div>
+        <div class="kpi-val" style="color:${ev>=0?'#5B8DEF':'var(--red)'}">${fmt(ev)}</div>
         <div class="kpi-label">Expect. Value</div>
         <div class="kpi-sub">per trade</div>
       </div>
@@ -3469,17 +3469,17 @@ function renderStats() {
     <div class="stat-section-title">RR Breakdown</div>
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-val" style="color:var(--gold)">${fmt(maxRR)}</div>
+        <div class="kpi-val" style="color:#F6E05E">${fmt(maxRR)}</div>
         <div class="kpi-label">Best Trade RR</div>
         <div class="kpi-sub">Max RR</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-val" style="color:var(--green)">${rrWin.length?fmt(minWinRR):'—'}</div>
+        <div class="kpi-val" style="color:#F6E05E">${rrWin.length?fmt(minWinRR):'—'}</div>
         <div class="kpi-label">Min RR (WIN)</div>
         <div class="kpi-sub">from ${rrWin.length} wins</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-val" style="color:var(--green)">${rrWin.length?fmt(avgWin):'—'}</div>
+        <div class="kpi-val" style="color:#F6E05E">${rrWin.length?fmt(avgWin):'—'}</div>
         <div class="kpi-label">Avg Win RR</div>
         <div class="kpi-sub">from ${rrWin.length} wins</div>
       </div>
@@ -3513,7 +3513,7 @@ function renderStats() {
             {v:wins.length, color:'var(--green)'},
             {v:losses.length, color:'var(--red)'},
             {v:bes.length, color:'var(--gold)'}
-          ], 110)}
+          ], 160)}
           <div class="donut-legend">
             <div class="donut-legend-item">
               <div class="donut-legend-dot" style="background:var(--green)"></div>
