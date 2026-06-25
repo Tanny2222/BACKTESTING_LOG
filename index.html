@@ -338,19 +338,15 @@
   }
   .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
 
-  /* ─── Page Tabs ─── */
+  /* ─── Page Tabs (now part of the header row) ─── */
   .page-tabs {
     display: flex;
-    gap: 4px;
-    padding: 0 2rem;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: var(--header-h, 73px);
-    background: var(--bg);
-    z-index: 90;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
   }
   .page-tab {
-    padding: 12px 18px;
+    padding: 8px 14px;
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
@@ -359,6 +355,7 @@
     font-weight: 600;
     font-family: var(--font-body);
     cursor: pointer;
+    white-space: nowrap;
     transition: color 0.15s, border-color 0.15s;
   }
   .page-tab:hover { color: var(--text); }
@@ -1595,39 +1592,29 @@
   }
 
   /* ─── Script Source Manager ─── */
-  .source-chip {
+  .source-icon-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
+    gap: 6px;
+    padding: 7px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: border-color 0.15s;
-    font-size: 12px;
     color: var(--text);
-    max-width: 200px;
-  }
-  .source-chip:hover { border-color: var(--green); }
-  .source-chip-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
     flex-shrink: 0;
   }
-  .source-chip-name {
+  .source-icon-btn:hover { color: var(--gold); border-color: var(--gold-dim); background: var(--surface2); }
+  .source-icon-btn svg { width: 14px; height: 14px; stroke: currentColor; flex-shrink: 0; }
+  .source-icon-label {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-  }
-  .source-chip-icon {
-    width: 12px; height: 12px;
-    stroke: var(--muted);
-    fill: none;
-    stroke-width: 2;
-    flex-shrink: 0;
+    line-height: 1;
   }
 
   /* script modal source list */
@@ -1741,21 +1728,31 @@
     </div>
     <div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div class="logo-text" id="bannerTitle">BACKTEST LOG</div>
-        <button class="banner-edit-btn" onclick="openBannerModal()" title="แก้ไข Banner">
-          <svg viewBox="0 0 16 16"><path d="M11.5 2.5l2 2L5 13l-3 1 1-3Z"/></svg>
-        </button>
+        <div class="logo-text" id="bannerTitle">BACKTESTING LAB</div>
       </div>
       <div class="logo-sub" id="bannerSub">Trade Image Journal</div>
     </div>
   </div>
 
-  <!-- ── Script Source Chip ── -->
-  <button class="source-chip" onclick="openScriptModal()" title="เปลี่ยน Script Source" id="sourceChip">
-    <span class="source-chip-dot"></span>
-    <span class="source-chip-name" id="sourceChipName">Default</span>
-    <svg class="source-chip-icon" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
-  </button>
+  <!-- ── Tab menu (moved up into the header row) ── -->
+  <div class="page-tabs">
+    <button class="page-tab active" id="tabStats" onclick="switchPage('stats')">📊 Statistics</button>
+    <button class="page-tab" id="tabTrades" onclick="switchPage('trades')">📋 Trades</button>
+    <button class="page-tab" id="tabGallery" onclick="switchPage('gallery')">🖼️ Gallery</button>
+    <button class="page-tab" id="tabRisk" onclick="switchPage('risk')">🛡️ Risk Management</button>
+    <button class="page-tab" id="tabMC" onclick="switchPage('mc')">🎲 Monte Carlo</button>
+  </div>
+
+  <!-- ── Script Source Button (right side) ── -->
+  <div style="display:flex;align-items:center;gap:8px">
+    <button class="source-icon-btn" onclick="openScriptModal()" title="จัดการ Script Source" id="sourceChip">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="10" cy="10" r="3"/>
+        <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"/>
+      </svg>
+      <span class="source-icon-label" id="sourceChipName">Default</span>
+    </button>
+  </div>
 
 </header>
 
@@ -1784,14 +1781,6 @@
   <button class="sidebar-nav-item" id="snav-risk" onclick="switchPage('risk');closeSidebar()"><span class="snav-icon">🛡️</span> Risk Management</button>
   <button class="sidebar-nav-item" id="snav-mc" onclick="switchPage('mc');closeSidebar()"><span class="snav-icon">🎲</span> Monte Carlo</button>
 </nav>
-
-<div class="page-tabs">
-  <button class="page-tab active" id="tabStats" onclick="switchPage('stats')">📊 Statistics</button>
-  <button class="page-tab" id="tabTrades" onclick="switchPage('trades')">📋 Trades</button>
-  <button class="page-tab" id="tabGallery" onclick="switchPage('gallery')">🖼️ Gallery</button>
-  <button class="page-tab" id="tabRisk" onclick="switchPage('risk')">🛡️ Risk Management</button>
-  <button class="page-tab" id="tabMC" onclick="switchPage('mc')">🎲 Monte Carlo</button>
-</div>
 
 <div id="pageTrades" class="page-view">
 
@@ -3310,7 +3299,7 @@ function resetSessionBtns() {
 }
 
 // ── Banner ──
-let banner = JSON.parse(localStorage.getItem('btj_banner') || '{"title":"BACKTEST LOG","sub":"Trade Image Journal"}');
+let banner = JSON.parse(localStorage.getItem('btj_banner') || '{"title":"BACKTESTING LAB","sub":"Trade Image Journal"}');
 
 function applyBanner() {
   document.getElementById('bannerTitle').textContent = banner.title;
@@ -4037,17 +4026,14 @@ function renderStats() {
 // ── Sticky offset measurement ──
 function updateStickyOffsets() {
   const header = document.querySelector('header');
-  const tabs   = document.querySelector('.page-tabs');
   const goal   = document.querySelector('.trades-goal-section');
   const toolbar = document.querySelector('.toolbar');
-  if (!header || !tabs) return;
+  if (!header) return;
   const hH = header.getBoundingClientRect().height;
-  const tH = tabs.getBoundingClientRect().height;
-  const tabsBottom = hH + tH;
   document.documentElement.style.setProperty('--header-h', hH + 'px');
-  document.documentElement.style.setProperty('--tabs-h', tabsBottom + 'px');
+  document.documentElement.style.setProperty('--tabs-h', hH + 'px');
   const gH = goal ? goal.getBoundingClientRect().height : 0;
-  const toolbarTop = tabsBottom + gH;
+  const toolbarTop = hH + gH;
   document.documentElement.style.setProperty('--toolbar-top', toolbarTop + 'px');
   const tbH = toolbar ? toolbar.getBoundingClientRect().height : 56;
   document.documentElement.style.setProperty('--table-top', (toolbarTop + tbH) + 'px');
@@ -4090,17 +4076,41 @@ function renderScriptSourceList() {
   }
 
   list.innerHTML = sources.map((s, i) => `
-    <div class="script-source-item ${s.active ? 'active-source' : ''}" onclick="setActiveSource(${i})">
+    <div class="script-source-item ${s.active ? 'active-source' : ''}" onclick="setActiveSource(${i})" id="srcItem_${i}">
       <div class="script-source-radio"></div>
-      <div class="script-source-info">
-        <div class="script-source-name">${escHtml(s.name)}</div>
-        <div class="script-source-url">${escHtml(s.url)}</div>
+      <div class="script-source-info" style="flex:1;min-width:0">
+        <input
+          value="${escHtml(s.name)}"
+          placeholder="ชื่อ Source"
+          onclick="event.stopPropagation()"
+          onchange="updateScriptSource(${i},'name',this.value)"
+          style="background:transparent;border:none;border-bottom:1px solid transparent;width:100%;padding:1px 0;font-size:13px;font-weight:600;color:var(--text);font-family:var(--font-body);outline:none;cursor:text;transition:border-color 0.12s"
+          onfocus="this.style.borderBottomColor='var(--green)'"
+          onblur="this.style.borderBottomColor='transparent'"
+        />
+        <input
+          value="${escHtml(s.url)}"
+          placeholder="https://script.google.com/…"
+          onclick="event.stopPropagation()"
+          onchange="updateScriptSource(${i},'url',this.value)"
+          style="background:transparent;border:none;border-bottom:1px solid transparent;width:100%;padding:1px 0;margin-top:3px;font-size:10px;color:var(--muted);font-family:var(--font-mono);outline:none;cursor:text;transition:border-color 0.12s"
+          onfocus="this.style.borderBottomColor='var(--green)'"
+          onblur="this.style.borderBottomColor='transparent'"
+        />
       </div>
       <button class="script-source-del" onclick="deleteScriptSource(event,${i})" title="ลบ">
         <svg viewBox="0 0 16 16"><polyline points="3,5 13,5"/><path d="M6 5V3h4v2M5 5l.8 9h4.4L11 5"/></svg>
       </button>
     </div>
   `).join('');
+}
+
+function updateScriptSource(idx, field, value) {
+  const sources = getScriptSources();
+  if (!sources[idx]) return;
+  sources[idx][field] = value.trim();
+  saveScriptSources(sources);
+  updateSourceChip();
 }
 
 function setActiveSource(idx) {
