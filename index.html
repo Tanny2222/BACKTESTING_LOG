@@ -4678,44 +4678,6 @@ function ddCalcRun() {
         <div style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:${probColor(pDaily)};line-height:1">${fmtProb(pDaily)}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:6px">แพ้ ${kDaily <= maxTrades ? kDaily : '>'+maxTrades}/${maxTrades} ไม้ · เฉลี่ยทุก ${daysToDaily === 99999 ? '∞' : daysToDaily} วัน</div>
       </div>
-      <div class="kpi-card" style="padding:14px 16px;border-color:${probColor(pMaxInMonth)}22">
-        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">📉 Hit Max DD Port / เดือน</div>
-        <div style="font-family:var(--font-mono);font-size:24px;font-weight:700;color:${probColor(pMaxInMonth)};line-height:1">${fmtProb(pMaxInMonth)}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">สะสม ${kMax} วันแย่ใน 20 วัน · WR ${(winrate*100).toFixed(0)}%</div>
-      </div>
-    </div>
-
-    <!-- Formula explanation — below KPI row, 2 columns full width -->
-    <div style="border-top:1px solid var(--border);padding-top:14px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">📐 วิธีคำนวณ</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px">
-          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">🎯 Hit Daily DD</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.8">
-            ต้องแพ้ <strong style="color:var(--text)">k = ⌈${dailyDD}% ÷ ${riskPct.toFixed(2)}%⌉ = ${kDaily} ไม้</strong> ใน ${maxTrades} ไม้/วัน<br>
-            ${kDaily > maxTrades
-              ? `<span style="color:var(--green)">k = ${kDaily} &gt; ${maxTrades} ไม้ที่เทรด → เป็นไปไม่ได้ในวันเดียว → โอกาส = 0%</span>`
-              : `ใช้ <strong style="color:var(--text)">Binomial Distribution</strong><br>
-                 P(แพ้ ≥ ${kDaily} ใน ${maxTrades}) = Σ C(${maxTrades},i) × ${(lossProb*100).toFixed(0)}%ⁱ × ${(winrate*100).toFixed(0)}%^(${maxTrades}-i)<br>
-                 <span style="color:var(--text)">สุ่มลำดับ Win/Loss อิสระทุกไม้ แพ้สะสมถึง Daily DD limit = hit</span>`
-            }
-          </div>
-        </div>
-
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px">
-          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">📉 Hit Max DD Port (Markov Chain)</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.8">
-            แบ่ง Max DD ${maxDD}% เป็น <strong style="color:var(--text)">${kMax} ขั้น</strong> (ขั้นละ Daily DD ${dailyDD}%)<br>
-            แต่ละวันจำลอง 2 ทาง:<br>
-            &nbsp;• <span style="color:var(--red)">วันแย่ (${fmtProb(pDaily)})</span> → เลื่อนเข้าใกล้ Ruin 1 ขั้น<br>
-            &nbsp;• <span style="color:var(--green)">วันดี (${fmtProb(1-pDaily)})</span> → ฟื้นตัว 1 ขั้น<br>
-            คำนวณ 20 วันว่ามีโอกาสเดินถึงขั้นสุดท้าย (Ruin) กี่ %<br>
-            <span style="color:var(--text)">ไม่ต้องติดกัน — สะสมข้ามวันได้</span>
-          </div>
-        </div>
-
-      </div>
     </div>
   `;
 }
