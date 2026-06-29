@@ -40,6 +40,19 @@
     --red: #D14F4F;
   }
 
+  html[data-theme="pastel"] {
+    --bg: #FBE0C3;
+    --surface: #FFF5EC;
+    --surface2: #F5D9C0;
+    --border: #E8C4A0;
+    --text: #344648;
+    --muted: #7D8E95;
+    --gold: #E8956A;
+    --gold-dim: #FFBB98;
+    --green: #4DA882;
+    --red: #C96060;
+  }
+
   html, body {
     overflow-x: clip;
     width: 100%;
@@ -471,6 +484,10 @@
   html[data-theme="light"] .pill-icon-btn .icon-moon { display: none !important; }
   html:not([data-theme="light"]) .pill-icon-btn .icon-sun { display: none !important; }
   html:not([data-theme="light"]) .pill-icon-btn .icon-moon { display: block !important; }
+  html[data-theme="pastel"] .pill-icon-btn .icon-sun { display: none !important; }
+  html[data-theme="pastel"] .pill-icon-btn .icon-moon { display: none !important; }
+  html[data-theme="pastel"] .pill-icon-btn .icon-palette { display: block !important; }
+  .pill-icon-btn .icon-palette { display: none; }
 
   .page-view { display: none; }
   .page-view.active { display: block; }
@@ -2103,6 +2120,7 @@
     <button class="pill-icon-btn" onclick="toggleTheme()" title="สลับธีม">
       <svg class="icon-moon" viewBox="0 0 16 16" style="width:15px;height:15px"><path d="M14 8.5A6 6 0 116.5 2 5 5 0 0014 8.5z"/></svg>
       <svg class="icon-sun" viewBox="0 0 16 16" style="width:15px;height:15px;display:none"><circle cx="8" cy="8" r="3.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M13 3l-1.5 1.5M4.5 11.5L3 13"/></svg>
+      <svg class="icon-palette" viewBox="0 0 16 16" style="width:15px;height:15px;display:none"><circle cx="8" cy="8" r="6.5" fill="none"/><circle cx="5.5" cy="5.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="10.5" cy="5.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="9.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="9.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
     </button>
   </div>
 
@@ -3701,21 +3719,22 @@ function saveBanner() {
 // ── Theme ──
 function toggleTheme() {
   const html = document.documentElement;
-  const isLight = html.getAttribute('data-theme') === 'light';
-  if (isLight) {
+  const current = html.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : current === 'light' ? 'pastel' : 'dark';
+  if (next === 'dark') {
     html.removeAttribute('data-theme');
-    localStorage.setItem('btj_theme', 'dark');
   } else {
-    html.setAttribute('data-theme', 'light');
-    localStorage.setItem('btj_theme', 'light');
+    html.setAttribute('data-theme', next);
   }
+  localStorage.setItem('btj_theme', next);
   const sidebarIcon = document.querySelector('.theme-toggle-icon');
-  if (sidebarIcon) sidebarIcon.textContent = html.getAttribute('data-theme') === 'light' ? '☀️' : '🌙';
+  if (sidebarIcon) sidebarIcon.textContent = next === 'light' ? '☀️' : next === 'pastel' ? '🎨' : '🌙';
 }
 
 (function applyTheme() {
   const saved = localStorage.getItem('btj_theme');
   if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else if (saved === 'pastel') document.documentElement.setAttribute('data-theme', 'pastel');
 })();
 
 (function applyRiskSettings() {
