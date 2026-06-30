@@ -2830,6 +2830,27 @@
   </div>
 </div>
 
+<!-- Trade Detail Modal (read-only view, opened via double-click on a row) -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span class="modal-title" id="detailModalTitle">Trade Detail</span>
+      <button class="icon-btn" onclick="closeDetailModal()">
+        <svg viewBox="0 0 16 16"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body" id="detailModalBody" style="display:flex;flex-direction:column;gap:18px">
+      <!-- filled by openTradeDetail() -->
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="closeDetailModal()">ปิด</button>
+      <button class="btn btn-primary" id="detailModalEditBtn" onclick="">✏️ แก้ไข Trade</button>
+    </div>
+  </div>
+</div>
+
 <!-- Target Modal -->
 <div class="modal-overlay" id="targetModal">
   <div class="modal" style="max-width:320px">
@@ -3419,7 +3440,7 @@ function renderCards() {
   };
 
   grid.innerHTML = filtered.map(t => `
-    <tr data-trade-id="${t.id}"${t.pcImage !== false ? ' class="pc-image-row"' : ''}>
+    <tr data-trade-id="${t.id}"${t.pcImage !== false ? ' class="pc-image-row"' : ''} ondblclick="openTradeDetail('${t.id}')" style="cursor:pointer">
       <td class="pc-img-col">
         <input type="checkbox" class="pc-img-checkbox" ${t.pcImage !== false ? 'checked' : ''} onchange="togglePcImage('${t.id}', this.checked)" title="PC IMAGE" />
       </td>
@@ -3674,6 +3695,87 @@ function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
 
+// ── Trade Detail Modal (read-only, opened via double-click on a row) ──
+function openTradeDetail(id) {
+  const t = trades.find(x => x.id === id);
+  if (!t) return;
+
+  document.getElementById('detailModalTitle').textContent = `Trade #${t.tradeNo}`;
+
+  const editBtn = document.getElementById('detailModalEditBtn');
+  if (editBtn) editBtn.onclick = () => { closeDetailModal(); editTrade(id); };
+
+  const statusColor = t.status === 'WIN' ? 'var(--green)' : t.status === 'LOSS' ? 'var(--red)' : 'var(--gold)';
+  const rrColor = (t.rr !== '' && t.rr !== undefined && parseFloat(t.rr) >= 0) ? 'var(--green)' : 'var(--red)';
+  const sessLabel = {asia:'Asia',london:'London',ny:'New York',oos:'Out of Session'}[t.session] || t.session || '—';
+  const entryTimeLabel = t.entryTime
+    ? (t.entryTime.includes(' - ') ? t.entryTime : (() => { const h = parseInt(t.entryTime); return isNaN(h) ? t.entryTime : `${String(h).padStart(2,'0')}:00 - ${String((h+1)%24).padStart(2,'0')}:00`; })())
+    : '—';
+
+  const imgGroup = (label, field) => {
+    const arr = toImgArray(t[field]);
+    if (!arr.length) return `
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${label}</div>
+        <div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;background:var(--surface2);border:1px dashed var(--border);border-radius:var(--radius-sm)">ไม่มีรูป</div>
+      </div>`;
+    return `
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${label}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${arr.map((src, idx) => `
+            <div style="width:84px;height:84px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);cursor:pointer;flex-shrink:0" onclick="openLightbox('${t.id}','${field}',${idx})">
+              <img src="${src}" alt="${label} ${idx+1}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.style.opacity='0.3'" />
+            </div>`).join('')}
+        </div>
+      </div>`;
+  };
+
+  const infoRow = (label, value, color) => `
+    <div style="display:flex;flex-direction:column;gap:3px;min-width:110px">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">${label}</span>
+      <span style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:${color || 'var(--text)'}">${value}</span>
+    </div>`;
+
+  document.getElementById('detailModalBody').innerHTML = `
+    <!-- Top info grid -->
+    <div style="display:flex;flex-wrap:wrap;gap:18px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      ${infoRow('Status', t.status ? `<span class="status-badge status-${t.status}" style="font-size:12px">${t.status}</span>` : '—')}
+      ${infoRow('RR', fmtRR(t.rr), rrColor)}
+      ${infoRow('Date', fmtDate(t.tradeDate) !== '—' ? fmtDate(t.tradeDate) : (t.date || '—'))}
+      ${infoRow('Entry Time', entryTimeLabel)}
+      ${infoRow('Session', sessLabel)}
+      ${infoRow('Duration', fmtDuration(t.duration))}
+    </div>
+
+    <!-- Tags -->
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Set Up / Tags</div>
+      ${Array.isArray(t.tags) && t.tags.length
+        ? `<div class="tag-cell-pills">${t.tags.map(tag => `<span class="tag-cell-pill">${tag}</span>`).join('')}</div>`
+        : '<span style="color:var(--muted);font-size:13px">—</span>'}
+    </div>
+
+    <!-- Before / After images -->
+    <div style="display:flex;gap:18px;flex-wrap:wrap">
+      ${imgGroup('Before', 'before')}
+      ${imgGroup('After', 'after')}
+    </div>
+
+    <!-- Note -->
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Note</div>
+      <div style="font-size:14px;line-height:1.6;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;white-space:pre-wrap">${t.note ? t.note : '<span style="color:var(--muted)">— ไม่มี note —</span>'}</div>
+    </div>
+  `;
+
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('open');
+}
+
 // ── Multi-image helpers ──
 let curImages = { before: [], after: [] };
 
@@ -3870,7 +3972,7 @@ function toggleTheme() {
 })();
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeLightbox(); closeBannerModal(); closeTargetModal(); }
+  if (e.key === 'Escape') { closeModal(); closeDetailModal(); closeLightbox(); closeBannerModal(); closeTargetModal(); }
 });
 
 // ── Page navigation ──
