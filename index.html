@@ -2989,10 +2989,12 @@ async function loadTrades() {
     renderStats();
     renderCalendar();
     setSourceStatus('ok');
+    hideSync();
   } catch(e) {
     showSync('โหลดข้อมูลไม่สำเร็จ: ' + e.message, true);
     console.error(e);
     setSourceStatus('error');
+    setTimeout(hideSync, 4000);
   }
 }
 
